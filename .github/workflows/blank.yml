@@ -1,6 +1,0 @@
-- name: Image Resizer Action
-  uses: sharadcodes/img-resizer@v1.1
-  with:
-    image-folder: 'images' # This is a Required field & this folder has original images
-    new-resolution: '400x400' # This is Required field
-    output-folder: "thumbnails" # This is Required field & this folder will be used to store resized images
