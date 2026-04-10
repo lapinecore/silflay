@@ -33,7 +33,7 @@ jobs:
         with:
           author_name: github-actions
           author_email: github-actions@github.com
-          message: chore: auto-generate thumbnails and gallery [skip ci]
+          message: 'chore: auto-generate thumbnails and gallery'
           add: 'images thumbnails README.md gallery.yml photos.yml'
           push: true
           token: ${{ secrets.GITHUB_TOKEN }}
