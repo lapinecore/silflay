@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import argparse
+import hashlib
 import re
 from pathlib import Path
 import yaml
@@ -11,12 +12,9 @@ THUMBNAIL_HEIGHT = 320
 GALLERY_CONFIG = Path('gallery.yml')
 PHOTO_METADATA = Path('photos.yml')
 
-# Future enhancement ideas:
-# - `layout: inline` (current behavior) outputs one image block per item.
-# - `layout: responsive` could emit multiple images on the same line and rely on GitHub to wrap.
-# - `layout: table` could produce a fixed-column grid with captions in a second row.
-# - `photos.yml` can be extended to include alt text, ordering, featured flags, and hide/show control.
-# These are notes only; the current implementation remains inline-only.
+# Supported layouts: 'inline' (one image block per line) and 'responsive' (fluid inline row).
+# `layout: table` (fixed-column grid) is noted but not yet implemented.
+# `photos.yml` can be extended with alt text, ordering, featured flags, and hide/show control.
 GALLERY_START = '<!-- gallery:start -->'
 GALLERY_END = '<!-- gallery:end -->'
 
@@ -77,22 +75,42 @@ def normalize_caption(filename: str):
     return caption
 
 
+def get_file_hash(path: Path) -> str:
+    h = hashlib.md5()
+    with path.open('rb') as f:
+        for chunk in iter(lambda: f.read(65536), b''):
+            h.update(chunk)
+    return h.hexdigest()
+
+
 def generate_thumbnail(source_path: Path, thumb_path: Path):
     thumb_path.parent.mkdir(parents=True, exist_ok=True)
     with Image.open(source_path) as image:
-        image.convert('RGB')
+        image = image.convert('RGB')
         image.thumbnail((THUMBNAIL_WIDTH, THUMBNAIL_HEIGHT), Image.LANCZOS)
         image.save(thumb_path, quality=90, optimize=True)
 
 
 def ensure_thumbnails(image_files, thumbnails_dir: Path):
+    manifest_path = thumbnails_dir / 'hashes.yml'
+    hashes = {}
+    if manifest_path.exists():
+        with manifest_path.open('r', encoding='utf-8') as f:
+            hashes = yaml.safe_load(f) or {}
+
     changed = False
     for image_path in image_files:
         thumb_path = thumbnails_dir / image_path.name
-        if not thumb_path.exists() or image_path.stat().st_mtime > thumb_path.stat().st_mtime:
+        current_hash = get_file_hash(image_path)
+        if not thumb_path.exists() or hashes.get(image_path.name) != current_hash:
             print(f'Generating thumbnail: {thumb_path}')
             generate_thumbnail(image_path, thumb_path)
+            hashes[image_path.name] = current_hash
             changed = True
+
+    if changed:
+        manifest_path.parent.mkdir(parents=True, exist_ok=True)
+        manifest_path.write_text(yaml.safe_dump(hashes, sort_keys=True), encoding='utf-8')
     return changed
 
 
@@ -103,10 +121,7 @@ def build_gallery_markdown(image_files, thumbnails_dir: Path, images_dir: Path, 
     if layout == 'responsive':
         return build_responsive_gallery_markdown(image_files, thumbnails_dir, images_dir, metadata)
 
-    # Current behavior: inline layout with one image block per item.
-    # Future options could include:
-    # - responsive inline wrapping: multiple images on one line, allowing viewport-based flow.
-    # - fixed-column table: predictable columns with captions below each thumbnail.
+    # inline layout: one image block per item with caption text below.
     lines = ['## Image Gallery', '']
     for image_path in image_files:
         thumb_rel = thumbnails_dir.joinpath(image_path.name).as_posix()
