@@ -1,0 +1,39 @@
+name: Thumbnail Gallery
+
+on:
+  push:
+    branches:
+      - main
+      - master
+    paths:
+      - 'images/**'
+  workflow_dispatch:
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: python -m pip install --upgrade pip Pillow
+
+      - name: Generate thumbnails and update gallery
+        run: python scripts/generate_gallery.py --images images --thumbnails thumbnails --readme README.md
+
+      - name: Commit generated thumbnails and README
+        uses: EndBug/add-and-commit@v9
+        with:
+          author_name: github-actions
+          author_email: github-actions@github.com
+          message: chore: auto-generate thumbnails and gallery [skip ci]
+          add: 'images thumbnails README.md'
+          push: true
+          token: ${{ secrets.GITHUB_TOKEN }}
