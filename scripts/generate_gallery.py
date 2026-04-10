@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import argparse
+import re
 from pathlib import Path
 import yaml
 from PIL import Image
@@ -70,6 +71,8 @@ def load_photo_metadata(image_files):
 def normalize_caption(filename: str):
     stem = Path(filename).stem
     caption = stem.replace('_', ' ').replace('-', ' ').replace('@', ' @ ')
+    caption = re.sub(r'([a-z0-9])([A-Z])', r'\1 \2', caption)
+    caption = re.sub(r'([A-Z]+)([A-Z][a-z])', r'\1 \2', caption)
     caption = ' '.join(caption.split())
     return caption
 

@@ -4,19 +4,6 @@
 
 ## Image Gallery
 
-[![BunnyThrone @ Bloom](thumbnails/BunnyThrone@Bloom.jpeg)](images/BunnyThrone@Bloom.jpeg)  
-BunnyThrone @ Bloom
-
-[![EasterWithMom](thumbnails/EasterWithMom.JPG)](images/EasterWithMom.JPG)  
-EasterWithMom
-
-[![HalloweenPurgeWarren](thumbnails/HalloweenPurgeWarren.jpeg)](images/HalloweenPurgeWarren.jpeg)  
-HalloweenPurgeWarren
-
-[![ModernMajorGeneral](thumbnails/ModernMajorGeneral.JPG)](images/ModernMajorGeneral.JPG)  
-ModernMajorGeneral
-
-[![PonderingLifeChoices @ JerrysJughouse](thumbnails/PonderingLifeChoices@JerrysJughouse.jpeg)](images/PonderingLifeChoices@JerrysJughouse.jpeg)  
-PonderingLifeChoices @ JerrysJughouse
+[![BunnyThrone @ Bloom](thumbnails/BunnyThrone@Bloom.jpeg "BunnyThrone @ Bloom")](images/BunnyThrone@Bloom.jpeg)  [![EasterWithMom](thumbnails/EasterWithMom.JPG "EasterWithMom")](images/EasterWithMom.JPG)  [![HalloweenPurgeWarren](thumbnails/HalloweenPurgeWarren.jpeg "HalloweenPurgeWarren")](images/HalloweenPurgeWarren.jpeg)  [![ModernMajorGeneral](thumbnails/ModernMajorGeneral.JPG "ModernMajorGeneral")](images/ModernMajorGeneral.JPG)  [![PonderingLifeChoices @ JerrysJughouse](thumbnails/PonderingLifeChoices@JerrysJughouse.jpeg "PonderingLifeChoices @ JerrysJughouse")](images/PonderingLifeChoices@JerrysJughouse.jpeg)
 
 <!-- gallery:end -->
