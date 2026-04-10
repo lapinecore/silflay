@@ -1,1 +1,4 @@
+# Supported layouts:
+#   inline     - one image block per item with visible caption text below each thumbnail
+#   responsive - fluid inline gallery; images wrap naturally and captions are shown as hover text
 layout: inline

@@ -10,6 +10,12 @@ THUMBNAIL_HEIGHT = 320
 GALLERY_CONFIG = Path('gallery.yml')
 PHOTO_METADATA = Path('photos.yml')
 
+# Future enhancement ideas:
+# - `layout: inline` (current behavior) outputs one image block per item.
+# - `layout: responsive` could emit multiple images on the same line and rely on GitHub to wrap.
+# - `layout: table` could produce a fixed-column grid with captions in a second row.
+# - `photos.yml` can be extended to include alt text, ordering, featured flags, and hide/show control.
+# These are notes only; the current implementation remains inline-only.
 GALLERY_START = '<!-- gallery:start -->'
 GALLERY_END = '<!-- gallery:end -->'
 
@@ -87,10 +93,17 @@ def ensure_thumbnails(image_files, thumbnails_dir: Path):
     return changed
 
 
-def build_gallery_markdown(image_files, thumbnails_dir: Path, images_dir: Path, metadata):
+def build_gallery_markdown(image_files, thumbnails_dir: Path, images_dir: Path, metadata, layout: str):
     if not image_files:
         return 'No images found in the gallery.\n'
 
+    if layout == 'responsive':
+        return build_responsive_gallery_markdown(image_files, thumbnails_dir, images_dir, metadata)
+
+    # Current behavior: inline layout with one image block per item.
+    # Future options could include:
+    # - responsive inline wrapping: multiple images on one line, allowing viewport-based flow.
+    # - fixed-column table: predictable columns with captions below each thumbnail.
     lines = ['## Image Gallery', '']
     for image_path in image_files:
         thumb_rel = thumbnails_dir.joinpath(image_path.name).as_posix()
@@ -101,6 +114,22 @@ def build_gallery_markdown(image_files, thumbnails_dir: Path, images_dir: Path, 
         lines.append(caption)
         lines.append('')
 
+    return '\n'.join(lines)
+
+
+def build_responsive_gallery_markdown(image_files, thumbnails_dir: Path, images_dir: Path, metadata):
+    lines = ['## Image Gallery', '']
+    image_links = []
+    for image_path in image_files:
+        thumb_rel = thumbnails_dir.joinpath(image_path.name).as_posix()
+        image_rel = images_dir.joinpath(image_path.name).as_posix()
+        image_meta = metadata.get(image_path.name, {}) or {}
+        caption = image_meta.get('caption') or normalize_caption(image_path.name)
+        title = caption.replace('"', '\\"')
+        image_links.append(f'[![{caption}]({thumb_rel} "{title}")]({image_rel})')
+
+    lines.append('  '.join(image_links))
+    lines.append('')
     return '\n'.join(lines)
 
 
@@ -128,13 +157,14 @@ def main():
         raise SystemExit(f'README file not found: {readme_path}')
 
     config = load_gallery_config()
-    if config['layout'] != 'inline':
-        raise SystemExit('Only inline layout is supported in the current gallery generator.')
+    layout = config['layout']
+    if layout not in {'inline', 'responsive'}:
+        raise SystemExit('Unsupported layout: {}. Supported layouts are inline and responsive.'.format(layout))
 
     image_files = get_images(images_dir)
     metadata = load_photo_metadata(image_files)
     ensure_thumbnails(image_files, thumbnails_dir)
-    gallery_markdown = build_gallery_markdown(image_files, thumbnails_dir, images_dir, metadata)
+    gallery_markdown = build_gallery_markdown(image_files, thumbnails_dir, images_dir, metadata, layout)
     update_readme(readme_path, gallery_markdown)
 
 
